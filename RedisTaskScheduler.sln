@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedisTaskScheduler", "RedisTaskScheduler\RedisTaskScheduler.csproj", "{1A0F6A02-9B46-4B3D-A7F3-19C6AC59108E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskRunnerService", "TaskRunnerService\TaskRunnerService.csproj", "{ABD16849-5E8A-4638-AF70-3615F6ED6625}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A0F6A02-9B46-4B3D-A7F3-19C6AC59108E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0F6A02-9B46-4B3D-A7F3-19C6AC59108E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0F6A02-9B46-4B3D-A7F3-19C6AC59108E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0F6A02-9B46-4B3D-A7F3-19C6AC59108E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABD16849-5E8A-4638-AF70-3615F6ED6625}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABD16849-5E8A-4638-AF70-3615F6ED6625}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABD16849-5E8A-4638-AF70-3615F6ED6625}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABD16849-5E8A-4638-AF70-3615F6ED6625}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
