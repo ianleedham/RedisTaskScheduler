@@ -21,9 +21,15 @@ namespace RedisTaskScheduler.Controllers
         }
 
         [HttpGet("TestEnqueue")]
-        public void TestEnqueue()
+        public void TestEnqueue(int? repeatPeriod)
         {
-            var task = new TestSchedulerTask("Test message", TimeSpan.FromMinutes(2));
+            TestSchedulerTask task;
+            if(repeatPeriod != null)
+                task = new TestSchedulerTask("Test message", TimeSpan.FromMinutes((int)repeatPeriod));
+            else 
+                task = new TestSchedulerTask("Test message");
+            
+
             _testTaskRepository.QueueSchedulerTask(task);
         }
         

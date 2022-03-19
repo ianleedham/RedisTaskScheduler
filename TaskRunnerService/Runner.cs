@@ -29,7 +29,8 @@ namespace TaskRunnerService
             task.TimeTaken = stopwatch.Elapsed;
             await _taskRepository.PopFromRunning(Id);
             task.Status = ScheduledTaskStatus.Done;
-            task.NextRunTime = DateTime.Now.Add((TimeSpan)task.RepeatPeriod);
+            if(task.RepeatPeriod != null)
+                task.NextRunTime = DateTime.Now.Add((TimeSpan)task.RepeatPeriod);
             await _taskRepository.PushToDone(task);
 
             await Requeue(task);

@@ -1,11 +1,20 @@
 using System;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace RedisTaskScheduler.Entities.Tasks
 {
     public class TestSchedulerTask : SchedulerTask
     {
-        public string Message { get; set;  }
+        public string Message { get; }
+
+        [JsonConstructor]
+        public TestSchedulerTask(string message)
+        {
+            Id = Guid.NewGuid();
+            Message = message;
+            Type = TaskType.Test;
+        }
         
         public TestSchedulerTask(string message, TimeSpan repeatPeriod) : base(repeatPeriod)
         {
