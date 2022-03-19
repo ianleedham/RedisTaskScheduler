@@ -1,42 +1,55 @@
 using System;
 using System.Diagnostics;
-using Newtonsoft.Json;
+using System.Threading.Tasks;
 using RedisTaskScheduler.Entities;
-using StackExchange.Redis;
+using RedisTaskScheduler.Entities.Tasks;
+using RedisTaskScheduler.Repository.Interfaces;
 
 namespace TaskRunnerService
 {
-    public class Runner
+    public class Runner<T> where T : SchedulerTask
     {
-        private readonly IDatabase _redis;
-        public Guid Id { get; }
-        public Runner(IDatabase redis)
+        private readonly ISchedulerTaskRepository<T> _taskRepository;
+        private Guid Id { get; }
+        public Runner(ISchedulerTaskRepository<T> taskRepository)
         {
-            _redis = redis;
+            _taskRepository = taskRepository;
             Id = Guid.NewGuid();
         }
-        public void Run()
+        public async Task Run()
         {
-            var taskString = _redis.ListRightPop("queued");
-            if (!taskString.HasValue)
-                return;
-            var task = JsonConvert.DeserializeObject<TestSchedulerTask>(taskString);
-            task.Status = ScheduledTaskStatus.Running;
-            
-            task.RunnerId = Id;
-            
-            taskString = JsonConvert.SerializeObject(task);
-            _redis.ListLeftPush("Running", taskString);
-            _redis.ListLeftPush($"{Id}-Running", taskString);
-            
+            T task = await _taskRepository.PopSchedulerTask();
+            if (task is null) return;
+            if (!await ReadyToRun(task)) return;
+
+            await _taskRepository.PushToRunning(task, Id);
             var stopwatch = Stopwatch.StartNew();
-            task?.Run();
-            _redis.ListRightPop($"{Id}-Running");
-            task.SecondsTaken = stopwatch.Elapsed.Seconds;
-            task.Status = ScheduledTaskStatus.Done;
-            taskString = JsonConvert.SerializeObject(task);
-            _redis.ListLeftPush($"done", taskString);
             
+            task.Run(Id);
+            task.TimeTaken = stopwatch.Elapsed;
+            await _taskRepository.PopFromRunning(Id);
+            task.Status = ScheduledTaskStatus.Done;
+            task.NextRunTime = DateTime.Now.Add((TimeSpan)task.RepeatPeriod);
+            await _taskRepository.PushToDone(task);
+
+            await Requeue(task);
+        }
+        
+        private async Task<bool> ReadyToRun(T task)
+        {
+            bool readyToRun = task.RepeatPeriod == null || task.NextRunTime < DateTime.Now;
+            if(!readyToRun)                         
+                await _taskRepository.QueueSchedulerTask(task); // requeue
+            return readyToRun;
+        }
+
+        private async Task Requeue(T task)
+        {            
+            if (task.RepeatPeriod is null) return;
+            task.RunTime = DateTime.MinValue;
+            task.NextRunTime = DateTime.Now.Add((TimeSpan)task.RepeatPeriod); 
+            task.Status = ScheduledTaskStatus.Queued;             
+            await _taskRepository.QueueSchedulerTask(task); // requeue 
         }
     }
 }

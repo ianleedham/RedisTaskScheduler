@@ -1,19 +1,24 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RedisTaskScheduler.Entities;
 
 namespace RedisTaskScheduler.Repository.Interfaces
 {
-    public interface ISchedulerTaskRepository
+    public interface ISchedulerTaskRepository<T>
     {        
         
-        IAsyncEnumerable<TestSchedulerTask>  GetSchedulerTasks();
+        IAsyncEnumerable<T?>  GetSchedulerTasks();
 
-        Task<TestSchedulerTask> PopSchedulerTask();
+        Task QueueSchedulerTask(T task);
+
+        Task<T?> PopSchedulerTask();
+        Task PushToRunning(T task, Guid id);
         
-        void UpdateSchedulerTask(TestSchedulerTask task);
-
-
+        Task PopFromRunning(Guid id);
+        
+        Task PushToDone(T task);
+        
         void ClearRedis();
     }
 }

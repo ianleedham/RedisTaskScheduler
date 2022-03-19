@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using RedisTaskScheduler.Entities;
+using RedisTaskScheduler.Entities.Tasks;
 using RedisTaskScheduler.Repository.Interfaces;
 
 namespace RedisTaskScheduler.Controllers
@@ -9,30 +10,46 @@ namespace RedisTaskScheduler.Controllers
     [Route("[controller]")]
     public class SchedulerTasksController : ControllerBase
     {
-        private readonly ISchedulerTaskRepository _schedulerTaskRepository;
+        private readonly ISchedulerTaskRepository<TestSchedulerTask> _testTaskRepository;
+        private readonly ISchedulerTaskRepository<UrlSchedulerTask> _urlTaskRepository;
 
-        public SchedulerTasksController(ISchedulerTaskRepository schedulerTaskRepository)
+        public SchedulerTasksController(ISchedulerTaskRepository<TestSchedulerTask> testTaskRepository,
+            ISchedulerTaskRepository<UrlSchedulerTask> urlTaskRepository)
         {
-            _schedulerTaskRepository = schedulerTaskRepository;
+            _testTaskRepository = testTaskRepository;
+            _urlTaskRepository = urlTaskRepository;
         }
 
         [HttpGet("TestEnqueue")]
         public void TestEnqueue()
         {
-            var task = new TestSchedulerTask("Test message");
-            _schedulerTaskRepository.UpdateSchedulerTask(task);
+            var task = new TestSchedulerTask("Test message", TimeSpan.FromMinutes(2));
+            _testTaskRepository.QueueSchedulerTask(task);
         }
         
-        [HttpGet("GetRunnerHistory")]
-        public IAsyncEnumerable<TestSchedulerTask?> GetRunnerHistory()
+        [HttpGet("TestEnqueue2")]
+        public void TestEnqueue2()
         {
-            return _schedulerTaskRepository.GetSchedulerTasks();
+            var task = new UrlSchedulerTask();
+            _urlTaskRepository.QueueSchedulerTask(task);
+        }
+        
+        [HttpGet("GetQueue")]
+        public async IAsyncEnumerable<string> GetQueue()
+        {
+            var testTasks = _testTaskRepository.GetSchedulerTasks();
+            var urlTasks = _urlTaskRepository.GetSchedulerTasks();
+            await foreach (var testTask in testTasks)
+                yield return testTask?.ToString();
+            await foreach (var testTask in urlTasks)
+                yield return testTask?.ToString();
         }
         
         [HttpGet("ClearRedis")]
         public void ClearRedis()
         {
-            _schedulerTaskRepository.ClearRedis();
+            _testTaskRepository.ClearRedis();
+            _urlTaskRepository.ClearRedis();
         }
     }
 }

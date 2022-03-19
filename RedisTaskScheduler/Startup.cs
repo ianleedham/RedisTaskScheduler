@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using RedisTaskScheduler.Entities;
+using RedisTaskScheduler.Entities.Tasks;
 using RedisTaskScheduler.Repository;
 using RedisTaskScheduler.Repository.Interfaces;
 using StackExchange.Redis;
@@ -27,24 +29,13 @@ namespace RedisTaskScheduler
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "RedisTaskScheduler", Version = "v1" });
             });
-
-            // services.AddSingleton<TaskQueue>();
-            
-            // services.AddStackExchangeRedisCache(options =>
-            // {
-            //     options.Configuration = Configuration.GetValue<string>("CacheSettings:ConnectionString");
-            // });
             
             IConnectionMultiplexer redis = ConnectionMultiplexer.Connect("localhost:6379");
             services.AddScoped(s => redis.GetDatabase());
             
-            // services.AddSingleton(sp => ConnectionMultiplexer.Connect(new ConfigurationOptions
-            // {//EndPoints = { $"{Configuration.GetValue<string>("RedisCache:Host")}:{Configuration.GetValue<int>("RedisCache:Port")}" },
-            //     EndPoints = { "localhost:6379" },
-            //     AbortOnConnectFail = false
-            // }));
-            
-            services.AddScoped<ISchedulerTaskRepository, SchedulerTaskRepository>();
+            services.AddScoped<ISchedulerTaskRepository<TestSchedulerTask>, TestSchedulerTasksRepository>();
+            services.AddScoped<ISchedulerTaskRepository<UrlSchedulerTask>, UrlTaskRepository>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
