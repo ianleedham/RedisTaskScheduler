@@ -13,4 +13,9 @@
     <ItemGroup>
       <ProjectReference Include="..\RedisTaskScheduler\RedisTaskScheduler.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Dockerfile" />
+      <None Remove=".dockerignore" />
+    </ItemGroup>
 </Project>
